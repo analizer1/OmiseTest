@@ -1,4 +1,4 @@
-package net.analizer.datalayer.models;
+package net.analizer.domainlayer.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -15,7 +15,6 @@ public class Charity implements Parcelable {
 
     @SerializedName("logo_url")
     public String logoUrl;
-
 
     public Charity() {
     }

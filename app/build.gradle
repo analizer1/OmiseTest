@@ -199,7 +199,9 @@ dependencies {
     /* ---------------------------------------------------------------  */
 
     /*                              NetWork                                 */
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0'
+    implementation 'com.google.code.gson:gson:2.8.1'
     /* ---------------------------------------------------------------      */
 
     implementation project(':domainlayer')

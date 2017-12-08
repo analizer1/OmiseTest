@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Locale;
+
 @SuppressWarnings("WeakerAccess")
 public class Charity implements Parcelable {
     @SerializedName("id")
@@ -17,6 +19,10 @@ public class Charity implements Parcelable {
     public String logoUrl;
 
     public Charity() {
+    }
+
+    public String getCharityName() {
+        return String.format(Locale.US, "%d. %s", id, name);
     }
 
     @Override

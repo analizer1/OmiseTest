@@ -70,7 +70,7 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
 
         if (donationAmount <= 0) {
             donationView.disableDonateBtn();
-            donationView.displayInvalidCardInfo();
+            donationView.displayInvalidDonationAmount();
             return;
         }
 
@@ -87,16 +87,18 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
         donationView.showLoading(false);
 
         Observable<String> tokenObservable = mApiInterface.getToken();
-        Observable<String> donateObservable = tokenObservable
+        tokenObservable
                 .flatMap(accessToken -> {
+                    if (TextUtils.isEmpty(accessToken)) {
+                        return Observable.error(new Throwable("Invalid Access Token"));
+                    }
+
                     Donation donation = new Donation(
                             creditCartInfo.creditCardHolderName,
                             accessToken,
                             donationAmount);
                     return mApiInterface.donate(donation);
-                });
-
-        donateObservable
+                })
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new NetworkObserver<String>() {
@@ -128,9 +130,12 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
     }
 
     private boolean isValidCreditCardInfo(CreditCartInfo creditCartInfo) {
-        return TextUtils.isEmpty(creditCartInfo.creditCardHolderName)
-                && TextUtils.isEmpty(creditCartInfo.creditCardNo)
-                && TextUtils.isEmpty(creditCartInfo.creditCardExpiry)
-                && TextUtils.isEmpty(creditCartInfo.creditCardCCV);
+        boolean isValid = creditCartInfo != null
+                && (creditCartInfo.creditCardHolderName != null && creditCartInfo.creditCardHolderName.length() > 0)
+                && (creditCartInfo.creditCardNo != null && creditCartInfo.creditCardNo.length() > 0)
+                && (creditCartInfo.creditCardExpiry != null && creditCartInfo.creditCardExpiry.length() > 0)
+                && (creditCartInfo.creditCardCCV != null && creditCartInfo.creditCardCCV.length() > 0);
+
+        return isValid;
     }
 }

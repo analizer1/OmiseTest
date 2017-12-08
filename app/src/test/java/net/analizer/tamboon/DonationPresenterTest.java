@@ -15,6 +15,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import io.reactivex.Observable;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -85,7 +86,7 @@ public class DonationPresenterTest {
         Observable<String> tokenObservable = Observable.just("Some Token");
 
         when(apiInterface.getToken()).thenReturn(tokenObservable);
-        when(apiInterface.donate(donation)).thenReturn(donateObservable);
+        when(apiInterface.donate(any(Donation.class))).thenReturn(donateObservable);
 
         donationPresenter.onSubmitDonation(validCreditCartInfo, 1);
 
@@ -100,7 +101,7 @@ public class DonationPresenterTest {
         Observable<String> tokenObservable = Observable.just("Some Token");
 
         when(apiInterface.getToken()).thenReturn(tokenObservable);
-        when(apiInterface.donate(donation)).thenReturn(donateObservable);
+        when(apiInterface.donate(any(Donation.class))).thenReturn(donateObservable);
 
         donationPresenter.onSubmitDonation(validCreditCartInfo, 1);
 
@@ -111,11 +112,9 @@ public class DonationPresenterTest {
 
     @Test
     public void testUnSuccessfulGetToken() throws Exception {
-        Observable<String> donateObservable = Observable.just("Success");
         Observable<String> tokenObservable = Observable.error(new Throwable("AccessToken Api Error"));
 
         when(apiInterface.getToken()).thenReturn(tokenObservable);
-        when(apiInterface.donate(donation)).thenReturn(donateObservable);
 
         donationPresenter.onSubmitDonation(validCreditCartInfo, 1);
 

@@ -17,4 +17,6 @@ public interface RetrofitInterface {
 
     @POST("/donate")
     Observable<String> donate(@Body Donation body);
+
+    // TODO: 8/12/17 implement getAccessToken
 }

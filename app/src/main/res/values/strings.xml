@@ -1,4 +1,10 @@
 <resources>
     <string name="error_title">Error</string>
+    <string name="error_credit_card_info">Invalid Credit Card Detail</string>
+    <string name="error_donation_amount">Invalid Donation Amount</string>
     <string name="label_ok">OK</string>
+    <string name="label_close">Close</string>
+    <string name="label_donate">Donate</string>
+    <string name="label_congratulations">Thank You for your donation.</string>
+    <string name="label_donation_amount">Donation Amount: </string>
 </resources>

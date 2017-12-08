@@ -30,4 +30,10 @@ public class ApiImp implements ApiInterface {
     public Observable<String> donate(Donation donation) {
         return mRetrofitInterface.donate(donation);
     }
+
+    @Override
+    public Observable<String> getToken() {
+        // TODO: 8/12/17 implement getAccessToken
+        return Observable.just("Some Valid Token");
+    }
 }

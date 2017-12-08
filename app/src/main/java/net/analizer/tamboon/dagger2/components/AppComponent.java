@@ -3,8 +3,9 @@ package net.analizer.tamboon.dagger2.components;
 import android.content.Context;
 
 import net.analizer.domainlayer.api.ApiInterface;
-import net.analizer.tamboon.CharityActivity;
+import net.analizer.tamboon.activities.CharityActivity;
 import net.analizer.tamboon.TamboonApplication;
+import net.analizer.tamboon.activities.DonateActivity;
 import net.analizer.tamboon.dagger2.modules.AppModule;
 import net.analizer.tamboon.dagger2.modules.NetModule;
 
@@ -18,6 +19,7 @@ import dagger.Component;
 public interface AppComponent {
 
     void inject(CharityActivity charityActivity);
+    void inject(DonateActivity donateActivity);
 
     ApiInterface apiInterface();
 

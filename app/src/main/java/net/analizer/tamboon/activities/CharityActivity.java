@@ -1,5 +1,6 @@
 package net.analizer.tamboon.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
@@ -106,8 +107,10 @@ public class CharityActivity extends BaseActivity implements CharityListView {
         charityPresenter.setView(this);
 
         // do other UIs initialization...
-        mOnCharityClickListener = charity ->
-                DonateActivity.showActivity(CharityActivity.this, charity);
+        mOnCharityClickListener = charity -> {
+            Intent intent = DonateActivity.getIntent(CharityActivity.this, charity);
+            startActivity(intent);
+        };
 
         charityPresenter.loadCharityList();
     }

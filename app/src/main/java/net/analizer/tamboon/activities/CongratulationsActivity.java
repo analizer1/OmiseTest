@@ -8,9 +8,8 @@ import net.analizer.tamboon.R;
 
 public class CongratulationsActivity extends AppCompatActivity {
 
-    public static void showActivity(AppCompatActivity appCompatActivity) {
-        Intent intent = new Intent(appCompatActivity, CongratulationsActivity.class);
-        appCompatActivity.startActivity(intent);
+    public static Intent getIntent(AppCompatActivity appCompatActivity) {
+        return new Intent(appCompatActivity, CongratulationsActivity.class);
     }
 
     @Override

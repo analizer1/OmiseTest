@@ -1,4 +1,4 @@
-package net.analizer.domainlayer.utils;
+package net.analizer.datalayer.keystores;
 
 public interface AccessKeyStore {
     /**

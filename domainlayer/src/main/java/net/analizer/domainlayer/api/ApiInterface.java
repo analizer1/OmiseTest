@@ -1,6 +1,7 @@
 package net.analizer.domainlayer.api;
 
 import net.analizer.domainlayer.models.Charity;
+import net.analizer.domainlayer.models.CreditCartInfo;
 import net.analizer.domainlayer.models.Donation;
 
 import java.util.List;
@@ -31,7 +32,8 @@ public interface ApiInterface {
     /**
      * Get access token.
      *
+     * @param creditCartInfo contains credit card details.
      * @return an access token.
      */
-    Observable<String> getToken();
+    Observable<String> getToken(CreditCartInfo creditCartInfo);
 }

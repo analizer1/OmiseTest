@@ -1,4 +1,4 @@
-package net.analizer.domainlayer;
+package net.analizer.datalayer;
 
 public abstract class AppConfig {
     public static final String OMISE_PKEY = "3030824185958161685430140087950536420198248447217383844240160470428020";

@@ -27,9 +27,8 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
-            android:name="co.omise.android.ui.CreditCardActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/OmiseSDKTheme" />
+            android:name="com.cooltechworks.creditcarddesign.CardEditActivity"
+            android:screenOrientation="portrait" />
         <activity android:name=".activities.CongratulationsActivity" />
     </application>
 

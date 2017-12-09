@@ -6,8 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 
 import net.analizer.domainlayer.models.Charity;
-import net.analizer.domainlayer.utils.AccessKeyFactory;
-import net.analizer.domainlayer.utils.AccessKeyStore;
 import net.analizer.tamboon.R;
 import net.analizer.tamboon.databinding.ActivityDonateBinding;
 import net.analizer.tamboon.views.DonationPresenter;
@@ -15,16 +13,11 @@ import net.analizer.tamboon.views.DonationView;
 
 import javax.inject.Inject;
 
-import co.omise.android.ui.CreditCardActivity;
-
 public class DonateActivity extends BaseActivity implements DonationView {
     private static final String EXTRA_CHARITY = "charity";
 
     @Inject
     DonationPresenter donationPresenter;
-
-    @Inject
-    AccessKeyFactory accessKeyFactory;
 
     private ActivityDonateBinding mViewBinding;
 //    private Charity mCharity; this does not get used atm
@@ -107,13 +100,5 @@ public class DonateActivity extends BaseActivity implements DonationView {
         // do other UIs initialization...
 //        Intent intent = getIntent();
 //        mCharity = intent.getParcelableExtra(EXTRA_CHARITY);
-    }
-
-    private void showCreditCardForm() {
-        AccessKeyStore accessKeyStore = accessKeyFactory.createAccessKeyStore();
-
-        Intent intent = new Intent(this, CreditCardActivity.class);
-        intent.putExtra(CreditCardActivity.EXTRA_PKEY, accessKeyStore.getAccessKey());
-        startActivityForResult(intent, accessKeyStore.getRequestCC());
     }
 }

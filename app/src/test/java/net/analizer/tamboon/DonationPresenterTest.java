@@ -27,17 +27,15 @@ public class DonationPresenterTest {
 
     private DonationPresenter donationPresenter;
 
+    private CreditCartInfo validCreditCartInfo;
+
+    private CreditCartInfo invalidCreditCartInfo;
+
     @Mock
     private DonationView donationView;
 
     @Mock
     private ApiInterface apiInterface;
-
-    @Mock
-    private CreditCartInfo validCreditCartInfo;
-
-    @Mock
-    private CreditCartInfo invalidCreditCartInfo;
 
     @Mock
     private Donation donation;
@@ -47,15 +45,17 @@ public class DonationPresenterTest {
         donationPresenter = new DonationPresenter(apiInterface);
         donationPresenter.setView(donationView);
 
-        validCreditCartInfo.creditCardHolderName = "PANATCHAI VATHANASRI";
-        validCreditCartInfo.creditCardNo = "38056789000000000";
-        validCreditCartInfo.creditCardExpiry = "01/22";
-        validCreditCartInfo.creditCardCCV = "552";
+        validCreditCartInfo = new CreditCartInfo();
+        validCreditCartInfo.setCreditCardHolderName("PANATCHAI VATHANASRI");
+        validCreditCartInfo.setCreditCardNo("38056789000000000");
+        validCreditCartInfo.setCreditCardExpiry("01/22");
+        validCreditCartInfo.setCreditCardCCV("552");
 
-        invalidCreditCartInfo.creditCardHolderName = "PANATCHAI VATHANASRI";
-        invalidCreditCartInfo.creditCardNo = "";
-        invalidCreditCartInfo.creditCardExpiry = "01/22";
-        invalidCreditCartInfo.creditCardCCV = "552";
+        invalidCreditCartInfo = new CreditCartInfo();
+        invalidCreditCartInfo.setCreditCardHolderName("PANATCHAI VATHANASRI");
+        invalidCreditCartInfo.setCreditCardNo("");
+        invalidCreditCartInfo.setCreditCardExpiry("01/22");
+        invalidCreditCartInfo.setCreditCardCCV("552");
     }
 
     @Test
@@ -85,7 +85,7 @@ public class DonationPresenterTest {
         Observable<String> donateObservable = Observable.just("Success");
         Observable<String> tokenObservable = Observable.just("Some Token");
 
-        when(apiInterface.getToken()).thenReturn(tokenObservable);
+        when(apiInterface.getToken(validCreditCartInfo)).thenReturn(tokenObservable);
         when(apiInterface.donate(any(Donation.class))).thenReturn(donateObservable);
 
         donationPresenter.onSubmitDonation(validCreditCartInfo, 1);
@@ -100,7 +100,7 @@ public class DonationPresenterTest {
         Observable<String> donateObservable = Observable.error(new Throwable("Donation Api Error"));
         Observable<String> tokenObservable = Observable.just("Some Token");
 
-        when(apiInterface.getToken()).thenReturn(tokenObservable);
+        when(apiInterface.getToken(validCreditCartInfo)).thenReturn(tokenObservable);
         when(apiInterface.donate(any(Donation.class))).thenReturn(donateObservable);
 
         donationPresenter.onSubmitDonation(validCreditCartInfo, 1);
@@ -114,7 +114,7 @@ public class DonationPresenterTest {
     public void testUnSuccessfulGetToken() throws Exception {
         Observable<String> tokenObservable = Observable.error(new Throwable("AccessToken Api Error"));
 
-        when(apiInterface.getToken()).thenReturn(tokenObservable);
+        when(apiInterface.getToken(validCreditCartInfo)).thenReturn(tokenObservable);
 
         donationPresenter.onSubmitDonation(validCreditCartInfo, 1);
 

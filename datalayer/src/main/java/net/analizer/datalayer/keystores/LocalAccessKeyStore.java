@@ -1,6 +1,7 @@
-package net.analizer.domainlayer.utils;
+package net.analizer.datalayer.keystores;
 
-import net.analizer.domainlayer.AppConfig;
+import net.analizer.datalayer.AppConfig;
+import net.analizer.domainlayer.utils.CryptoUtils;
 
 import java.math.BigInteger;
 

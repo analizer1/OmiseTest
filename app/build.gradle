@@ -184,7 +184,7 @@ dependencies {
 
     /*                      Other 3rd party's libs                          */
     implementation 'com.squareup.picasso:picasso:2.5.2'
-    implementation 'co.omise:omise-android:2.3.0'
+    implementation 'com.github.sharish:CreditCardView:v1.0.4'
     /* ---------------------------------------------------------------      */
 
     /* ---------------------------------------------------------------  */

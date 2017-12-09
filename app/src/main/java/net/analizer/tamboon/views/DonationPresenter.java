@@ -62,7 +62,7 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
             return;
         }
 
-        if (!isValidCreditCardInfo(creditCartInfo)) {
+        if (!creditCartInfo.isValid()) {
             donationView.disableDonateBtn();
             donationView.displayInvalidCardInfo();
             return;
@@ -86,7 +86,7 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
 
         donationView.showLoading(false);
 
-        Observable<String> tokenObservable = mApiInterface.getToken();
+        Observable<String> tokenObservable = mApiInterface.getToken(creditCartInfo);
         tokenObservable
                 .flatMap(accessToken -> {
                     if (TextUtils.isEmpty(accessToken)) {
@@ -94,7 +94,7 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
                     }
 
                     Donation donation = new Donation(
-                            creditCartInfo.creditCardHolderName,
+                            creditCartInfo.getCreditCardHolderName(),
                             accessToken,
                             donationAmount);
                     return mApiInterface.donate(donation);
@@ -127,15 +127,5 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
                         donationView.displayError(msg);
                     }
                 });
-    }
-
-    private boolean isValidCreditCardInfo(CreditCartInfo creditCartInfo) {
-        boolean isValid = creditCartInfo != null
-                && (creditCartInfo.creditCardHolderName != null && creditCartInfo.creditCardHolderName.length() > 0)
-                && (creditCartInfo.creditCardNo != null && creditCartInfo.creditCardNo.length() > 0)
-                && (creditCartInfo.creditCardExpiry != null && creditCartInfo.creditCardExpiry.length() > 0)
-                && (creditCartInfo.creditCardCCV != null && creditCartInfo.creditCardCCV.length() > 0);
-
-        return isValid;
     }
 }

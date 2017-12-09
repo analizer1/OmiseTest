@@ -27,4 +27,11 @@ public interface ApiInterface {
      * @return
      */
     Observable<String> donate(@Body Donation donation);
+
+    /**
+     * Get access token.
+     *
+     * @return an access token.
+     */
+    Observable<String> getToken();
 }

@@ -20,6 +20,12 @@ public class Donation implements Parcelable {
     public Donation() {
     }
 
+    public Donation(String name, String token, Long amount) {
+        this.name = name;
+        this.token = token;
+        this.amount = amount;
+    }
+
     @Override
     public int describeContents() {
         return 0;

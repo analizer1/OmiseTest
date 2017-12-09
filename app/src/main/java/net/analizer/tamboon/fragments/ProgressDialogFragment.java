@@ -1,4 +1,4 @@
-package net.analizer.tamboon;
+package net.analizer.tamboon.fragments;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;

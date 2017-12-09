@@ -1,14 +1,15 @@
-package net.analizer.tamboon;
+package net.analizer.tamboon.activities;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.view.View;
 
 import net.analizer.domainlayer.models.Charity;
+import net.analizer.tamboon.R;
 import net.analizer.tamboon.adapters.CharityListAdapter;
 import net.analizer.tamboon.databinding.ActivityCharityBinding;
+import net.analizer.tamboon.fragments.ProgressDialogFragment;
 import net.analizer.tamboon.presenters.CharityPresenter;
 import net.analizer.tamboon.views.CharityListView;
 
@@ -23,6 +24,7 @@ public class CharityActivity extends BaseActivity implements CharityListView {
 
     private ActivityCharityBinding mViewBinding;
     private CharityListAdapter mCharityListAdapter;
+    private CharityListAdapter.OnCharityClickListener mOnCharityClickListener;
 
     @Override
     protected int getLayoutResId() {
@@ -70,13 +72,7 @@ public class CharityActivity extends BaseActivity implements CharityListView {
 
     @Override
     public void displayError(@NonNull String errMsg) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatDialog);
-        builder.setTitle(R.string.error_title)
-                .setMessage(errMsg)
-                .setPositiveButton(R.string.label_ok, (dialogInterface, i) -> {
-                    // do something after the OK button is clicked here...
-                })
-                .show();
+        showAlert(getString(R.string.error_title), errMsg);
     }
 
     @Override
@@ -85,6 +81,7 @@ public class CharityActivity extends BaseActivity implements CharityListView {
         mViewBinding.emptyCharityListTextView.setVisibility(View.GONE);
 
         mCharityListAdapter = new CharityListAdapter(charityList);
+        mCharityListAdapter.setOnClickListener(mOnCharityClickListener);
         mViewBinding.charityRecyclerView.setAdapter(mCharityListAdapter);
     }
 
@@ -94,6 +91,7 @@ public class CharityActivity extends BaseActivity implements CharityListView {
         mViewBinding.charityRecyclerView.setVisibility(View.GONE);
 
         if (mCharityListAdapter != null) {
+            mCharityListAdapter.clear();
             mCharityListAdapter.notifyDataSetChanged();
         }
     }
@@ -108,6 +106,9 @@ public class CharityActivity extends BaseActivity implements CharityListView {
         charityPresenter.setView(this);
 
         // do other UIs initialization...
+        mOnCharityClickListener = charity ->
+                DonateActivity.showActivity(CharityActivity.this, charity);
+
         charityPresenter.loadCharityList();
     }
 }

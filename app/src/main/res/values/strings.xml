@@ -6,5 +6,6 @@
     <string name="label_close">Close</string>
     <string name="label_donate">Donate</string>
     <string name="label_congratulations">Thank You for your donation.</string>
-    <string name="label_donation_amount">Donation Amount: </string>
+    <string name="label_donation_amount">Donation Amount (THB): </string>
+    <string name="label_card_holder_name">Card Holder Name</string>
 </resources>

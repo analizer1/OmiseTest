@@ -4,8 +4,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
+
+import com.cooltechworks.creditcarddesign.CardEditActivity;
+import com.cooltechworks.creditcarddesign.CreditCardUtils;
 
 import net.analizer.domainlayer.models.Charity;
+import net.analizer.domainlayer.models.CreditCartInfo;
 import net.analizer.tamboon.R;
 import net.analizer.tamboon.databinding.ActivityDonateBinding;
 import net.analizer.tamboon.views.DonationPresenter;
@@ -16,11 +22,15 @@ import javax.inject.Inject;
 public class DonateActivity extends BaseActivity implements DonationView {
     private static final String EXTRA_CHARITY = "charity";
 
+    private final int GET_NEW_CARD = 2;
+
     @Inject
     DonationPresenter donationPresenter;
 
     private ActivityDonateBinding mViewBinding;
 //    private Charity mCharity; this does not get used atm
+
+    private TextWatcher mDonationAmountChangedWatcher;
 
     public static Intent getIntent(AppCompatActivity appCompatActivity, Charity charity) {
         Intent intent = new Intent(appCompatActivity, DonateActivity.class);
@@ -36,15 +46,37 @@ public class DonateActivity extends BaseActivity implements DonationView {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewBinding = getViewBinding(ActivityDonateBinding.class);
 
         initializeInjector();
         initializeUIs();
     }
 
     @Override
+    public void onActivityResult(int reqCode, int resultCode, Intent data) {
+
+        if (reqCode == GET_NEW_CARD && resultCode == RESULT_OK && data != null) {
+            String cardHolderName = data.getStringExtra(CreditCardUtils.EXTRA_CARD_HOLDER_NAME);
+            String cardNumber = data.getStringExtra(CreditCardUtils.EXTRA_CARD_NUMBER);
+            String expiry = data.getStringExtra(CreditCardUtils.EXTRA_CARD_EXPIRY);
+            String cvv = data.getStringExtra(CreditCardUtils.EXTRA_CARD_CVV);
+
+            CreditCartInfo creditCartInfo = new CreditCartInfo(
+                    cardNumber,
+                    cardHolderName,
+                    expiry,
+                    cvv
+            );
+
+            onDonationDetailsChanged(
+                    creditCartInfo,
+                    mViewBinding.donationAmountEditText.getText().toString());
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         donationPresenter.setView(null);
+        mViewBinding.donationAmountEditText.removeTextChangedListener(mDonationAmountChangedWatcher);
         super.onDestroy();
     }
 
@@ -60,7 +92,24 @@ public class DonateActivity extends BaseActivity implements DonationView {
 
     @Override
     public void displayDonationComplete() {
+        Intent intent = CongratulationsActivity.getIntent(this);
+        startActivity(intent);
+        finish();
+    }
 
+    @Override
+    public void displayCardEditor() {
+
+        Intent intent = new Intent(DonateActivity.this, CardEditActivity.class);
+        startActivityForResult(intent, GET_NEW_CARD);
+    }
+
+    @Override
+    public void displayCreditCard(CreditCartInfo creditCartInfo) {
+        mViewBinding.donationCreditCardView.setCardNumber(creditCartInfo.getCreditCardNo());
+        mViewBinding.donationCreditCardView.setCardHolderName(creditCartInfo.getCreditCardHolderName());
+        mViewBinding.donationCreditCardView.setCardExpiry(creditCartInfo.getCreditCardExpiry());
+        mViewBinding.donationCreditCardView.setCVV(creditCartInfo.getCreditCardCVV());
     }
 
     @Override
@@ -98,7 +147,50 @@ public class DonateActivity extends BaseActivity implements DonationView {
         donationPresenter.setView(this);
 
         // do other UIs initialization...
+        mViewBinding = getViewBinding(ActivityDonateBinding.class);
 //        Intent intent = getIntent();
 //        mCharity = intent.getParcelableExtra(EXTRA_CHARITY);
+
+        mDonationAmountChangedWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+                String cardHolderName = mViewBinding.donationCreditCardView.getCardHolderName();
+                String cardNumber = mViewBinding.donationCreditCardView.getCardNumber();
+                String expiry = mViewBinding.donationCreditCardView.getExpiry();
+                String cvv = mViewBinding.donationCreditCardView.getCVV();
+
+                CreditCartInfo creditCartInfo = new CreditCartInfo(
+                        cardNumber,
+                        cardHolderName,
+                        expiry,
+                        cvv
+                );
+
+                onDonationDetailsChanged(creditCartInfo, editable.toString());
+            }
+        };
+
+        mViewBinding.donationCreditCardView.setOnClickListener(view -> donationPresenter.onCreditCardClicked());
+        mViewBinding.donationAmountEditText.addTextChangedListener(mDonationAmountChangedWatcher);
+    }
+
+    private void onDonationDetailsChanged(CreditCartInfo creditCartInfo, String donation) {
+        Long donationAmount = null;
+        if (donation != null && donation.length() > 0) {
+            donationAmount = Long.parseLong(donation);
+        }
+
+        donationPresenter.onDonationDetailsEntered(
+                creditCartInfo,
+                donationAmount);
     }
 }

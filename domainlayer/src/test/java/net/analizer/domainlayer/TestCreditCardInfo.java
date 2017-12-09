@@ -19,7 +19,7 @@ public class TestCreditCardInfo {
         creditCartInfo.setCreditCardHolderName("PANATCHAI VATHANASRI");
         creditCartInfo.setCreditCardNo("38056789000000000");
         creditCartInfo.setCreditCardExpiry("01/22");
-        creditCartInfo.setCreditCardCCV("552");
+        creditCartInfo.setCreditCardCVV("552");
 
         assertThat(creditCartInfo.isValid(), is(equalTo(true)));
     }
@@ -30,7 +30,7 @@ public class TestCreditCardInfo {
         creditCartInfo.setCreditCardHolderName("PANATCHAI VATHANASRI");
         creditCartInfo.setCreditCardNo("");
         creditCartInfo.setCreditCardExpiry("01/22");
-        creditCartInfo.setCreditCardCCV("552");
+        creditCartInfo.setCreditCardCVV("552");
 
         assertThat(creditCartInfo.isValid(), is(equalTo(false)));
     }
@@ -41,7 +41,7 @@ public class TestCreditCardInfo {
         creditCartInfo.setCreditCardHolderName("PANATCHAI VATHANASRI");
         creditCartInfo.setCreditCardNo("38056789000000000");
         creditCartInfo.setCreditCardExpiry("0122");
-        creditCartInfo.setCreditCardCCV("552");
+        creditCartInfo.setCreditCardCVV("552");
 
         assertThat(creditCartInfo.isValid(), is(equalTo(false)));
     }
@@ -52,7 +52,7 @@ public class TestCreditCardInfo {
         creditCartInfo.setCreditCardHolderName("PANATCHAI VATHANASRI");
         creditCartInfo.setCreditCardNo("38056789000000000");
         creditCartInfo.setCreditCardExpiry("01/22");
-        creditCartInfo.setCreditCardCCV("AAA");
+        creditCartInfo.setCreditCardCVV("AAA");
 
         assertThat(creditCartInfo.isValid(), is(equalTo(false)));
     }

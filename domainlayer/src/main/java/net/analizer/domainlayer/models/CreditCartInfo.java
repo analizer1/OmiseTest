@@ -9,7 +9,7 @@ public class CreditCartInfo implements Parcelable {
     private String creditCardNo;
     private String creditCardHolderName;
     private String creditCardExpiry;
-    private String creditCardCCV;
+    private String creditCardCVV;
 
     public CreditCartInfo() {
     }
@@ -17,12 +17,12 @@ public class CreditCartInfo implements Parcelable {
     public CreditCartInfo(String creditCardNo,
                           String creditCardHolderName,
                           String creditCardExpiry,
-                          String creditCardCCV) {
+                          String creditCardCVV) {
 
         this.creditCardNo = creditCardNo;
         this.creditCardHolderName = creditCardHolderName;
         this.creditCardExpiry = creditCardExpiry;
-        this.creditCardCCV = creditCardCCV;
+        this.creditCardCVV = creditCardCVV;
     }
 
     public String getCreditCardNo() {
@@ -33,8 +33,8 @@ public class CreditCartInfo implements Parcelable {
         return creditCardHolderName;
     }
 
-    public String getCreditCardCCV() {
-        return creditCardCCV;
+    public String getCreditCardCVV() {
+        return creditCardCVV;
     }
 
     public int getExpiryMonth() {
@@ -45,6 +45,10 @@ public class CreditCartInfo implements Parcelable {
     public int getExpiryYear() {
         String[] split = creditCardExpiry.split("/");
         return Integer.parseInt(split[1].trim());
+    }
+
+    public String getCreditCardExpiry() {
+        return creditCardExpiry;
     }
 
     public void setCreditCardNo(String creditCardNo) {
@@ -59,16 +63,16 @@ public class CreditCartInfo implements Parcelable {
         this.creditCardExpiry = creditCardExpiry;
     }
 
-    public void setCreditCardCCV(String creditCardCCV) {
-        this.creditCardCCV = creditCardCCV;
+    public void setCreditCardCVV(String creditCardCVV) {
+        this.creditCardCVV = creditCardCVV;
     }
 
     public boolean isValid() {
         return (creditCardHolderName != null && creditCardHolderName.length() > 0)
-                && (creditCardNo != null && creditCardNo.length() > 0)
+                && (creditCardNo != null && creditCardNo.length() == 16)
                 && (creditCardExpiry != null && creditCardExpiry.length() > 0)
-                && (creditCardCCV != null && creditCardCCV.length() > 0)
-                && (creditCardCCV.matches("\\b[0-9]{3}\\b"))
+                && (creditCardCVV != null && creditCardCVV.length() > 0)
+                && (creditCardCVV.matches("\\b[0-9]{3}\\b"))
                 && (creditCardExpiry.matches("^[\\d ]+/[\\d ]+"));
     }
 
@@ -82,14 +86,14 @@ public class CreditCartInfo implements Parcelable {
         dest.writeString(this.creditCardNo);
         dest.writeString(this.creditCardHolderName);
         dest.writeString(this.creditCardExpiry);
-        dest.writeString(this.creditCardCCV);
+        dest.writeString(this.creditCardCVV);
     }
 
     protected CreditCartInfo(Parcel in) {
         this.creditCardNo = in.readString();
         this.creditCardHolderName = in.readString();
         this.creditCardExpiry = in.readString();
-        this.creditCardCCV = in.readString();
+        this.creditCardCVV = in.readString();
     }
 
     public static final Parcelable.Creator<CreditCartInfo> CREATOR = new Parcelable.Creator<CreditCartInfo>() {

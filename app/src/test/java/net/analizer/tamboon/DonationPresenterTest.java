@@ -16,6 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import io.reactivex.Observable;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,37 +48,55 @@ public class DonationPresenterTest {
 
         validCreditCartInfo = new CreditCartInfo();
         validCreditCartInfo.setCreditCardHolderName("PANATCHAI VATHANASRI");
-        validCreditCartInfo.setCreditCardNo("38056789000000000");
+        validCreditCartInfo.setCreditCardNo("3805678900000000");
         validCreditCartInfo.setCreditCardExpiry("01/22");
-        validCreditCartInfo.setCreditCardCCV("552");
+        validCreditCartInfo.setCreditCardCVV("552");
 
         invalidCreditCartInfo = new CreditCartInfo();
         invalidCreditCartInfo.setCreditCardHolderName("PANATCHAI VATHANASRI");
         invalidCreditCartInfo.setCreditCardNo("");
         invalidCreditCartInfo.setCreditCardExpiry("01/22");
-        invalidCreditCartInfo.setCreditCardCCV("552");
+        invalidCreditCartInfo.setCreditCardCVV("552");
     }
 
     @Test
-    public void textCreditCardValidationForValidCard() throws Exception {
-        donationPresenter.onDonationDetailsEntered(validCreditCartInfo, 1);
+    public void testCreditCardValidationForValidCard() throws Exception {
+        donationPresenter.onDonationDetailsEntered(validCreditCartInfo, 1L);
+        verify(donationView).displayCreditCard(validCreditCartInfo);
         verify(donationView).enableDonateBtn();
     }
 
     @Test
-    public void textCreditCardValidationForInvValidCard() throws Exception {
-        donationPresenter.onDonationDetailsEntered(invalidCreditCartInfo, 1);
+    public void testCreditCardValidationForInvValidCard() throws Exception {
+        donationPresenter.onDonationDetailsEntered(invalidCreditCartInfo, 1L);
 
         verify(donationView).disableDonateBtn();
         verify(donationView).displayInvalidCardInfo();
     }
 
     @Test
-    public void textCreditCardValidationForInvalidDonationAmount() throws Exception {
-        donationPresenter.onDonationDetailsEntered(validCreditCartInfo, 0);
+    public void testValidCardButZeroDonationAmount() throws Exception {
+        donationPresenter.onDonationDetailsEntered(validCreditCartInfo, 0L);
+
+        verify(donationView).disableDonateBtn();
+        verify(donationView, never()).displayInvalidDonationAmount();
+    }
+
+    @Test
+    public void testCreditCardValidationForInvalidDonationAmount() throws Exception {
+        donationPresenter.onDonationDetailsEntered(validCreditCartInfo, -1L);
 
         verify(donationView).disableDonateBtn();
         verify(donationView).displayInvalidDonationAmount();
+    }
+
+    @Test
+    public void testValidCardButNoAmountEntered() throws Exception {
+        donationPresenter.onDonationDetailsEntered(validCreditCartInfo, null);
+
+        verify(donationView).displayCreditCard(any(CreditCartInfo.class));
+        verify(donationView).disableDonateBtn();
+        verify(donationView, never()).displayInvalidDonationAmount();
     }
 
     @Test

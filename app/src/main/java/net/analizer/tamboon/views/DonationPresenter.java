@@ -55,7 +55,8 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
         return charityListView;
     }
 
-    public void onDonationDetailsEntered(@NonNull CreditCartInfo creditCartInfo, long donationAmount) {
+    public void onDonationDetailsEntered(@NonNull CreditCartInfo creditCartInfo,
+                                         @Nullable Long donationAmount) {
 
         DonationView donationView = mDonateViewRef.get();
         if (donationView == null) {
@@ -68,13 +69,24 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
             return;
         }
 
-        if (donationAmount <= 0) {
-            donationView.disableDonateBtn();
-            donationView.displayInvalidDonationAmount();
-            return;
-        }
+        donationView.displayCreditCard(creditCartInfo);
 
-        donationView.enableDonateBtn();
+        if (donationAmount != null) {
+            if (donationAmount < 0) {
+                donationView.disableDonateBtn();
+                donationView.displayInvalidDonationAmount();
+                return;
+
+            } else if (donationAmount == 0) {
+                donationView.disableDonateBtn();
+                return;
+            }
+
+            donationView.enableDonateBtn();
+
+        } else {
+            donationView.disableDonateBtn();
+        }
     }
 
     public void onSubmitDonation(@NonNull CreditCartInfo creditCartInfo, long donationAmount) {
@@ -127,5 +139,14 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
                         donationView.displayError(msg);
                     }
                 });
+    }
+
+    public void onCreditCardClicked() {
+        DonationView donationView = mDonateViewRef.get();
+        if (donationView == null) {
+            return;
+        }
+
+        donationView.displayCardEditor();
     }
 }

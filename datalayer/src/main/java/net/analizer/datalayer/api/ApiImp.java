@@ -68,7 +68,7 @@ public class ApiImp implements ApiInterface {
             request.name = creditCartInfo.getCreditCardHolderName();
             request.expirationMonth = creditCartInfo.getExpiryMonth();
             request.expirationYear = creditCartInfo.getExpiryYear();
-            request.securityCode = creditCartInfo.getCreditCardCCV();
+            request.securityCode = creditCartInfo.getCreditCardCVV();
 
             client.send(request, new TokenRequestListener() {
                 @Override

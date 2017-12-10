@@ -6,6 +6,7 @@ import net.analizer.domainlayer.api.ApiInterface;
 import net.analizer.domainlayer.models.Charity;
 import net.analizer.domainlayer.models.CreditCartInfo;
 import net.analizer.domainlayer.models.Donation;
+import net.analizer.domainlayer.models.DonationResponse;
 
 import java.security.GeneralSecurityException;
 import java.util.List;
@@ -18,15 +19,14 @@ import co.omise.android.TokenRequest;
 import co.omise.android.TokenRequestListener;
 import co.omise.android.models.Token;
 import io.reactivex.Observable;
-import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.ReplaySubject;
 
 @Singleton
 public class ApiImp implements ApiInterface {
 
-    private PublishSubject<String> mTokenSubject;
+    private ReplaySubject<String> mTokenSubject;
 
     private RetrofitInterface mRetrofitInterface;
     private AccessKeyFactory mAccessKeyFactory;
@@ -43,49 +43,45 @@ public class ApiImp implements ApiInterface {
     }
 
     @Override
-    public Observable<String> donate(Donation donation) {
+    public Observable<DonationResponse> donate(Donation donation) {
         return mRetrofitInterface.donate(donation);
     }
 
     @Override
     public Observable<String> getToken(CreditCartInfo creditCartInfo) {
 
-        mTokenSubject = PublishSubject.create();
+        mTokenSubject = ReplaySubject.create();
+        mTokenSubject.observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.newThread())
+                .subscribe();
 
-        Observable.create((ObservableOnSubscribe<String>) e -> {
+        AccessKeyStore accessKeyStore = mAccessKeyFactory.createAccessKeyStore();
+        Client client;
+        try {
+            client = new Client(accessKeyStore.getAccessKey());
+        } catch (GeneralSecurityException ex) {
+            return Observable.error(ex);
+        }
 
-            AccessKeyStore accessKeyStore = mAccessKeyFactory.createAccessKeyStore();
-            Client client;
-            try {
-                client = new Client(accessKeyStore.getAccessKey());
-            } catch (GeneralSecurityException ex) {
-                mTokenSubject.onError(ex);
-                return;
+        TokenRequest request = new TokenRequest();
+        request.number = creditCartInfo.getCreditCardNo();
+        request.name = creditCartInfo.getCreditCardHolderName();
+        request.expirationMonth = creditCartInfo.getExpiryMonth();
+        request.expirationYear = creditCartInfo.getExpiryYear();
+        request.securityCode = creditCartInfo.getCreditCardCVV();
+
+        client.send(request, new TokenRequestListener() {
+            @Override
+            public void onTokenRequestSucceed(TokenRequest request, Token token) {
+                mTokenSubject.onNext(token.id);
+                mTokenSubject.onComplete();
             }
 
-            TokenRequest request = new TokenRequest();
-            request.number = creditCartInfo.getCreditCardNo();
-            request.name = creditCartInfo.getCreditCardHolderName();
-            request.expirationMonth = creditCartInfo.getExpiryMonth();
-            request.expirationYear = creditCartInfo.getExpiryYear();
-            request.securityCode = creditCartInfo.getCreditCardCVV();
-
-            client.send(request, new TokenRequestListener() {
-                @Override
-                public void onTokenRequestSucceed(TokenRequest request, Token token) {
-                    mTokenSubject.onNext(token.id);
-                    mTokenSubject.onComplete();
-                }
-
-                @Override
-                public void onTokenRequestFailed(TokenRequest request, Throwable throwable) {
-                    mTokenSubject.onError(throwable);
-                }
-            });
-        })
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(mTokenSubject);
+            @Override
+            public void onTokenRequestFailed(TokenRequest request, Throwable throwable) {
+                mTokenSubject.onError(throwable);
+            }
+        });
 
         return mTokenSubject;
     }

@@ -3,6 +3,7 @@ package net.analizer.domainlayer.api;
 import net.analizer.domainlayer.models.Charity;
 import net.analizer.domainlayer.models.CreditCartInfo;
 import net.analizer.domainlayer.models.Donation;
+import net.analizer.domainlayer.models.DonationResponse;
 
 import java.util.List;
 
@@ -25,9 +26,8 @@ public interface ApiInterface {
      * Make a donation to a selected charity.
      *
      * @param donation the donation
-     * @return
      */
-    Observable<String> donate(@Body Donation donation);
+    Observable<DonationResponse> donate(@Body Donation donation);
 
     /**
      * Get access token.

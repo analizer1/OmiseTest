@@ -15,8 +15,7 @@
         <activity
             android:name=".activities.CharityActivity"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"
-            android:taskAffinity="">
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,16 +25,14 @@
         <activity
             android:name=".activities.DonateActivity"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"
-            android:taskAffinity="" />
+            android:screenOrientation="portrait" />
         <activity
             android:name="com.cooltechworks.creditcarddesign.CardEditActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.CongratulationsActivity"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"
-            android:taskAffinity="" />
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

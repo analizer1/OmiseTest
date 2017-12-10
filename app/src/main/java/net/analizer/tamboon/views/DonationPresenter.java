@@ -4,12 +4,16 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
+
 import net.analizer.domainlayer.api.ApiInterface;
 import net.analizer.domainlayer.models.CreditCartInfo;
 import net.analizer.domainlayer.models.Donation;
+import net.analizer.domainlayer.models.DonationResponse;
 import net.analizer.domainlayer.rx.NetworkObserver;
 import net.analizer.tamboon.presenters.BasicPresenter;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import javax.inject.Inject;
@@ -17,6 +21,7 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
 
 @SuppressWarnings("WeakerAccess")
 public class DonationPresenter implements BasicPresenter<DonationView> {
@@ -100,6 +105,8 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
 
         Observable<String> tokenObservable = mApiInterface.getToken(creditCartInfo);
         tokenObservable
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.newThread())
                 .flatMap(accessToken -> {
                     if (TextUtils.isEmpty(accessToken)) {
                         return Observable.error(new Throwable("Invalid Access Token"));
@@ -109,13 +116,14 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
                             creditCartInfo.getCreditCardHolderName(),
                             accessToken,
                             donationAmount);
-                    return mApiInterface.donate(donation);
+
+                    return mApiInterface.donate(donation)
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribeOn(Schedulers.newThread());
                 })
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new NetworkObserver<String>() {
+                .subscribe(new NetworkObserver<DonationResponse>() {
                     @Override
-                    public void onResponse(String response) {
+                    public void onResponse(DonationResponse response) {
                         donationView.dismissLoading();
                         donationView.displayDonationComplete();
                     }
@@ -126,10 +134,27 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
 
                         // In this case,
                         // Client cannot be sure of how well the server is implemented.
-                        // These checkings reassure that we do not display NULL message.
-                        String msg = t.getMessage();
-                        if (TextUtils.isEmpty(msg) && t.getCause() != null) {
-                            msg = t.getCause().getMessage();
+                        // These checks reassure that we do not display NULL message.
+                        String msg = null;
+
+                        if (HttpException.class.isAssignableFrom(t.getClass())) {
+                            HttpException exception = (HttpException) t;
+                            if (exception.response() != null) {
+                                ResponseBody responseBody = exception.response().errorBody();
+                                if (responseBody != null) {
+                                    try {
+                                        msg = responseBody.string();
+                                    } catch (IOException e) {
+                                    }
+                                }
+                            }
+
+                        } else {
+                            msg = t.getMessage();
+                        }
+
+                        if (TextUtils.isEmpty(msg)) {
+                            msg = t.toString();
                         }
 
                         if (TextUtils.isEmpty(msg)) {

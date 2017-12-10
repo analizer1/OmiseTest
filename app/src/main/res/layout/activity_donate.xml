@@ -16,9 +16,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:elevation="10dp"
-            app:card_holder_name="@string/label_card_holder_name"
-            app:card_number="0000000000000000"
-            app:cvv="000"
+            app:card_holder_name="John Smith"
+            app:card_number="4242424242424242"
+            app:cvv="111"
+            app:card_expiration="02/20"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

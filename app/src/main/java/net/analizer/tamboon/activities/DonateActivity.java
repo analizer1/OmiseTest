@@ -3,6 +3,7 @@ package net.analizer.tamboon.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -14,6 +15,7 @@ import net.analizer.domainlayer.models.Charity;
 import net.analizer.domainlayer.models.CreditCartInfo;
 import net.analizer.tamboon.R;
 import net.analizer.tamboon.databinding.ActivityDonateBinding;
+import net.analizer.tamboon.fragments.ProgressDialogFragment;
 import net.analizer.tamboon.views.DonationPresenter;
 import net.analizer.tamboon.views.DonationView;
 
@@ -129,12 +131,25 @@ public class DonateActivity extends BaseActivity implements DonationView {
 
     @Override
     public void showLoading(boolean isCancelable) {
-
+        if (canUpdateView()) {
+            FragmentManager supportFragmentManager = getSupportFragmentManager();
+            ProgressDialogFragment progressDialogFragment = ProgressDialogFragment.newInstance(isCancelable);
+            supportFragmentManager
+                    .beginTransaction()
+                    .add(progressDialogFragment, ProgressDialogFragment.class.getName())
+                    .commitNowAllowingStateLoss();
+        }
     }
 
     @Override
     public void dismissLoading() {
-
+        FragmentManager supportFragmentManager = getSupportFragmentManager();
+        ProgressDialogFragment loadingDialogFragment = (ProgressDialogFragment)
+                supportFragmentManager.findFragmentByTag(ProgressDialogFragment.class.getName());
+        if (loadingDialogFragment != null) {
+            loadingDialogFragment.dismissAllowingStateLoss();
+            supportFragmentManager.executePendingTransactions();
+        }
     }
 
     private void initializeInjector() {
@@ -163,24 +178,33 @@ public class DonateActivity extends BaseActivity implements DonationView {
             @Override
             public void afterTextChanged(Editable editable) {
 
-                String cardHolderName = mViewBinding.donationCreditCardView.getCardHolderName();
-                String cardNumber = mViewBinding.donationCreditCardView.getCardNumber();
-                String expiry = mViewBinding.donationCreditCardView.getExpiry();
-                String cvv = mViewBinding.donationCreditCardView.getCVV();
-
-                CreditCartInfo creditCartInfo = new CreditCartInfo(
-                        cardNumber,
-                        cardHolderName,
-                        expiry,
-                        cvv
-                );
-
+                CreditCartInfo creditCartInfo = getCurrentCreditCardInfo();
                 onDonationDetailsChanged(creditCartInfo, editable.toString());
             }
         };
 
         mViewBinding.donationCreditCardView.setOnClickListener(view -> donationPresenter.onCreditCardClicked());
         mViewBinding.donationAmountEditText.addTextChangedListener(mDonationAmountChangedWatcher);
+        mViewBinding.donateButton.setOnClickListener(view -> {
+            CreditCartInfo creditCartInfo = getCurrentCreditCardInfo();
+            Long donationAmount =
+                    Long.parseLong(mViewBinding.donationAmountEditText.getText().toString());
+            donationPresenter.onSubmitDonation(creditCartInfo, donationAmount);
+        });
+    }
+
+    private CreditCartInfo getCurrentCreditCardInfo() {
+        String cardHolderName = mViewBinding.donationCreditCardView.getCardHolderName();
+        String cardNumber = mViewBinding.donationCreditCardView.getCardNumber();
+        String expiry = mViewBinding.donationCreditCardView.getExpiry();
+        String cvv = mViewBinding.donationCreditCardView.getCVV();
+
+        return new CreditCartInfo(
+                cardNumber,
+                cardHolderName,
+                expiry,
+                cvv
+        );
     }
 
     private void onDonationDetailsChanged(CreditCartInfo creditCartInfo, String donation) {

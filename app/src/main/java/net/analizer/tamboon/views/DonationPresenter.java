@@ -9,8 +9,6 @@ import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
 import net.analizer.domainlayer.api.ApiInterface;
 import net.analizer.domainlayer.models.CreditCartInfo;
 import net.analizer.domainlayer.models.Donation;
-import net.analizer.domainlayer.models.DonationResponse;
-import net.analizer.domainlayer.rx.NetworkObserver;
 import net.analizer.tamboon.presenters.BasicPresenter;
 
 import java.io.IOException;
@@ -18,8 +16,10 @@ import java.lang.ref.WeakReference;
 
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 
@@ -90,6 +90,7 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
             donationView.enableDonateBtn();
 
         } else {
+            donationView.focusOnDonationAmountInput();
             donationView.disableDonateBtn();
         }
     }
@@ -103,14 +104,11 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
 
         donationView.showLoading(false);
 
-        Observable<String> tokenObservable = mApiInterface.getToken(creditCartInfo);
-        tokenObservable
+        Single<String> tokenSingle = mApiInterface.getToken(creditCartInfo);
+        tokenSingle
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.newThread())
-                .flatMap(accessToken -> {
-                    if (TextUtils.isEmpty(accessToken)) {
-                        return Observable.error(new Throwable("Invalid Access Token"));
-                    }
+                .flatMap((Function<String, SingleSource<?>>) accessToken -> {
 
                     Donation donation = new Donation(
                             creditCartInfo.getCreditCardHolderName(),
@@ -121,48 +119,43 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribeOn(Schedulers.newThread());
                 })
-                .subscribe(new NetworkObserver<DonationResponse>() {
-                    @Override
-                    public void onResponse(DonationResponse response) {
-                        donationView.dismissLoading();
-                        donationView.displayDonationComplete();
-                    }
+                .subscribe(response -> {
+                    donationView.dismissLoading();
+                    donationView.displayDonationComplete();
 
-                    @Override
-                    public void onNetworkError(Throwable t) {
-                        donationView.dismissLoading();
+                }, throwable -> {
+                    donationView.dismissLoading();
 
-                        // In this case,
-                        // Client cannot be sure of how well the server is implemented.
-                        // These checks reassure that we do not display NULL message.
-                        String msg = null;
+                    // In this case,
+                    // Client cannot be sure of how well the server is implemented.
+                    // These checks reassure that we do not display NULL message.
+                    String msg = null;
 
-                        if (HttpException.class.isAssignableFrom(t.getClass())) {
-                            HttpException exception = (HttpException) t;
-                            if (exception.response() != null) {
-                                ResponseBody responseBody = exception.response().errorBody();
-                                if (responseBody != null) {
-                                    try {
-                                        msg = responseBody.string();
-                                    } catch (IOException e) {
-                                    }
+                    if (HttpException.class.isAssignableFrom(throwable.getClass())) {
+                        HttpException exception = (HttpException) throwable;
+                        if (exception.response() != null) {
+                            ResponseBody responseBody = exception.response().errorBody();
+                            if (responseBody != null) {
+                                try {
+                                    msg = responseBody.string();
+                                } catch (IOException e) {
                                 }
                             }
-
-                        } else {
-                            msg = t.getMessage();
                         }
 
-                        if (TextUtils.isEmpty(msg)) {
-                            msg = t.toString();
-                        }
-
-                        if (TextUtils.isEmpty(msg)) {
-                            msg = "Unknown Error";
-                        }
-
-                        donationView.displayError(msg);
+                    } else {
+                        msg = throwable.getMessage();
                     }
+
+                    if (TextUtils.isEmpty(msg)) {
+                        msg = throwable.toString();
+                    }
+
+                    if (TextUtils.isEmpty(msg)) {
+                        msg = "Unknown Error";
+                    }
+
+                    donationView.displayError(msg);
                 });
     }
 

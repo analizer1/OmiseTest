@@ -99,4 +99,8 @@ dependencies {
     androidTestAnnotationProcessor 'com.google.dagger:dagger-compiler:2.10'
     provided 'javax.annotation:jsr250-api:1.0'
     /* ---------------------------------------------------------------      */
+
+    /*                      Other 3rd party's libs                          */
+    implementation 'co.omise:omise-android:2.3.0'
+    /* ---------------------------------------------------------------      */
 }

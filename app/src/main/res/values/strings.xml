@@ -9,4 +9,5 @@
     <string name="label_congratulations">Thank You for your donation.</string>
     <string name="label_donation_amount">Donation Amount (THB): </string>
     <string name="label_card_holder_name">Card Holder Name</string>
+    <string name="label_charity_profile_image">Charity Image</string>
 </resources>

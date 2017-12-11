@@ -3,6 +3,7 @@ package net.analizer.tamboon;
 import net.analizer.domainlayer.api.ApiInterface;
 import net.analizer.domainlayer.models.CreditCartInfo;
 import net.analizer.domainlayer.models.Donation;
+import net.analizer.domainlayer.models.DonationResponse;
 import net.analizer.tamboon.views.DonationPresenter;
 import net.analizer.tamboon.views.DonationView;
 
@@ -13,7 +14,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import io.reactivex.Observable;
+import io.reactivex.Single;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -37,9 +38,6 @@ public class DonationPresenterTest {
 
     @Mock
     private ApiInterface apiInterface;
-
-    @Mock
-    private Donation donation;
 
     @Before
     public void setUp() {
@@ -95,17 +93,18 @@ public class DonationPresenterTest {
         donationPresenter.onDonationDetailsEntered(validCreditCartInfo, null);
 
         verify(donationView).displayCreditCard(any(CreditCartInfo.class));
+        verify(donationView).focusOnDonationAmountInput();
         verify(donationView).disableDonateBtn();
         verify(donationView, never()).displayInvalidDonationAmount();
     }
 
     @Test
     public void testSuccessfulDonate() throws Exception {
-        Observable<String> donateObservable = Observable.just("Success");
-        Observable<String> tokenObservable = Observable.just("Some Token");
+        Single<DonationResponse> donateSingle = Single.just(new DonationResponse());
+        Single<String> tokenSingle = Single.just("Some Token");
 
-        when(apiInterface.getToken(validCreditCartInfo)).thenReturn(tokenObservable);
-        when(apiInterface.donate(any(Donation.class))).thenReturn(donateObservable);
+        when(apiInterface.getToken(validCreditCartInfo)).thenReturn(tokenSingle);
+        when(apiInterface.donate(any(Donation.class))).thenReturn(donateSingle);
 
         donationPresenter.onSubmitDonation(validCreditCartInfo, 1);
 
@@ -116,11 +115,11 @@ public class DonationPresenterTest {
 
     @Test
     public void testUnSuccessfulDonate() throws Exception {
-        Observable<String> donateObservable = Observable.error(new Throwable("Donation Api Error"));
-        Observable<String> tokenObservable = Observable.just("Some Token");
+        Single<DonationResponse> donateSingle = Single.error(new Throwable("Donation Api Error"));
+        Single<String> tokenSingle = Single.just("Some Token");
 
-        when(apiInterface.getToken(validCreditCartInfo)).thenReturn(tokenObservable);
-        when(apiInterface.donate(any(Donation.class))).thenReturn(donateObservable);
+        when(apiInterface.getToken(validCreditCartInfo)).thenReturn(tokenSingle);
+        when(apiInterface.donate(any(Donation.class))).thenReturn(donateSingle);
 
         donationPresenter.onSubmitDonation(validCreditCartInfo, 1);
 
@@ -131,9 +130,9 @@ public class DonationPresenterTest {
 
     @Test
     public void testUnSuccessfulGetToken() throws Exception {
-        Observable<String> tokenObservable = Observable.error(new Throwable("AccessToken Api Error"));
+        Single<String> tokenSingle = Single.error(new Throwable("AccessToken Api Error"));
 
-        when(apiInterface.getToken(validCreditCartInfo)).thenReturn(tokenObservable);
+        when(apiInterface.getToken(validCreditCartInfo)).thenReturn(tokenSingle);
 
         donationPresenter.onSubmitDonation(validCreditCartInfo, 1);
 

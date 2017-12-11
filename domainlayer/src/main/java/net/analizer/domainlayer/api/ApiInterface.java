@@ -7,7 +7,9 @@ import net.analizer.domainlayer.models.DonationResponse;
 
 import java.util.List;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import retrofit2.http.Body;
 
 /**
@@ -27,7 +29,7 @@ public interface ApiInterface {
      *
      * @param donation the donation
      */
-    Observable<DonationResponse> donate(@Body Donation donation);
+    Single<DonationResponse> donate(@Body Donation donation);
 
     /**
      * Get access token.
@@ -35,5 +37,5 @@ public interface ApiInterface {
      * @param creditCartInfo contains credit card details.
      * @return an access token.
      */
-    Observable<String> getToken(CreditCartInfo creditCartInfo);
+    Single<String> getToken(CreditCartInfo creditCartInfo);
 }

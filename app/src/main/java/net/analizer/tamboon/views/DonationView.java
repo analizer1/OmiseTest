@@ -40,4 +40,9 @@ public interface DonationView extends LoadingView {
      * @param creditCartInfo the Credit Card Detail
      */
     void displayCreditCard(CreditCartInfo creditCartInfo);
+
+    /**
+     * Tell the view to focus the donation amount input view.
+     */
+    void focusOnDonationAmountInput();
 }

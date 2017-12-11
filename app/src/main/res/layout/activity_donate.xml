@@ -16,10 +16,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:elevation="10dp"
+            app:card_expiration="02/20"
             app:card_holder_name="John Smith"
             app:card_number="4242424242424242"
             app:cvv="111"
-            app:card_expiration="02/20"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -37,13 +37,16 @@
 
         <EditText
             android:id="@+id/donationAmount_editText"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
-            android:hint="100"
+            android:hint="2000"
             android:inputType="number"
+            android:selectAllOnFocus="true"
             app:layout_constraintBottom_toBottomOf="@+id/donationAmountLabel_textView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight="1"
             app:layout_constraintStart_toEndOf="@+id/donationAmountLabel_textView"
             app:layout_constraintTop_toTopOf="@+id/donationAmountLabel_textView" />
 

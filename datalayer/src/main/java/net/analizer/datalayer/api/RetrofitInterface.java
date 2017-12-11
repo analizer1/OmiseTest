@@ -7,6 +7,7 @@ import net.analizer.domainlayer.models.DonationResponse;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
@@ -19,5 +20,5 @@ public interface RetrofitInterface {
 
     @Headers("Content-Type: application/json")
     @POST("/donate")
-    Observable<DonationResponse> donate(@Body Donation donation);
+    Single<DonationResponse> donate(@Body Donation donation);
 }

@@ -115,6 +115,12 @@ public class DonateActivity extends BaseActivity implements DonationView {
     }
 
     @Override
+    public void focusOnDonationAmountInput() {
+        mViewBinding.donationAmountEditText.requestFocus();
+        mViewBinding.donationAmountEditText.invalidate();
+    }
+
+    @Override
     public void displayInvalidCardInfo() {
         displayError(getString(R.string.error_credit_card_info));
     }

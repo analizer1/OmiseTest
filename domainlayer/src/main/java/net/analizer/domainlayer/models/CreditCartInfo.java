@@ -68,6 +68,7 @@ public class CreditCartInfo implements Parcelable {
     }
 
     public boolean isValid() {
+        // TODO: 10/12/17 correct the credit card validation
         return (creditCardHolderName != null && creditCardHolderName.length() > 0)
                 && (creditCardNo != null && creditCardNo.length() == 16)
                 && (creditCardExpiry != null && creditCardExpiry.length() > 0)

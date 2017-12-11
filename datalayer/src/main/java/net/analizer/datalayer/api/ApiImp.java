@@ -18,7 +18,9 @@ import co.omise.android.Client;
 import co.omise.android.TokenRequest;
 import co.omise.android.TokenRequestListener;
 import co.omise.android.models.Token;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.ReplaySubject;
@@ -43,24 +45,21 @@ public class ApiImp implements ApiInterface {
     }
 
     @Override
-    public Observable<DonationResponse> donate(Donation donation) {
+    public Single<DonationResponse> donate(Donation donation) {
         return mRetrofitInterface.donate(donation);
     }
 
     @Override
-    public Observable<String> getToken(CreditCartInfo creditCartInfo) {
+    public Single<String> getToken(CreditCartInfo creditCartInfo) {
 
         mTokenSubject = ReplaySubject.create();
-        mTokenSubject.observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.newThread())
-                .subscribe();
 
         AccessKeyStore accessKeyStore = mAccessKeyFactory.createAccessKeyStore();
         Client client;
         try {
             client = new Client(accessKeyStore.getAccessKey());
         } catch (GeneralSecurityException ex) {
-            return Observable.error(ex);
+            return Single.error(ex);
         }
 
         TokenRequest request = new TokenRequest();
@@ -83,6 +82,6 @@ public class ApiImp implements ApiInterface {
             }
         });
 
-        return mTokenSubject;
+        return mTokenSubject.singleOrError();
     }
 }

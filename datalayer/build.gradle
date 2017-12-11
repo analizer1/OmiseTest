@@ -1,33 +1,74 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 26
+    def BOOLEAN = "boolean"
+    def TRUE = "true"
+    def FALSE = "false"
+    def PRODUCTION = "PRODUCTION"
+    def DEVELOP = "DEVELOP"
+    def STAGING = "STAGING"
 
-
+    compileSdkVersion rootProject.ext.mTargetSdkVersion
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 26
-        versionCode 1
-        versionName "1.0"
-
+        minSdkVersion rootProject.ext.mMinSdkVersion
+        targetSdkVersion rootProject.ext.mTargetSdkVersion
+        versionCode rootProject.ext.mVersionCode
+        versionName rootProject.ext.mVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            zipAlignEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+        debug {
+            minifyEnabled false
+            versionNameSuffix "-DEBUG"
         }
     }
 
+    flavorDimensions "mainapp"
+    productFlavors {
+        dev {
+            dimension "mainapp"
+            buildConfigField BOOLEAN, DEVELOP, TRUE
+            buildConfigField BOOLEAN, STAGING, FALSE
+            buildConfigField BOOLEAN, PRODUCTION, FALSE
+        }
+        stage {
+            dimension "mainapp"
+            buildConfigField BOOLEAN, DEVELOP, FALSE
+            buildConfigField BOOLEAN, STAGING, TRUE
+            buildConfigField BOOLEAN, PRODUCTION, FALSE
+        }
+        prod {
+            dimension "mainapp"
+            buildConfigField BOOLEAN, DEVELOP, FALSE
+            buildConfigField BOOLEAN, STAGING, FALSE
+            buildConfigField BOOLEAN, PRODUCTION, TRUE
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packagingOptions {
+        exclude 'META-INF/maven/com.google.guava/guava/pom.properties'
+        exclude 'META-INF/maven/com.google.guava/guava/pom.xml'
+        exclude 'META-INF/rxjava.properties'
+    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support:appcompat-v7:27.0.2'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
 
@@ -53,6 +94,10 @@ dependencies {
     testAnnotationProcessor 'com.google.dagger:dagger-compiler:2.10'
     androidTestAnnotationProcessor 'com.google.dagger:dagger-compiler:2.10'
     provided 'javax.annotation:jsr250-api:1.0'
+    /* ---------------------------------------------------------------      */
+
+    /*                      Other 3rd party's libs                          */
+    implementation 'co.omise:omise-android:2.3.0'
     /* ---------------------------------------------------------------      */
 
     implementation project(':domainlayer')

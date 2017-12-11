@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 
+import net.analizer.tamboon.R;
+
 public class ProgressDialogFragment extends DialogFragment {
     private static final String ARG_CANCELABLE = "isCancelable";
 
@@ -38,6 +40,7 @@ public class ProgressDialogFragment extends DialogFragment {
 
         ProgressDialog dialog = new ProgressDialog(getActivity(), getTheme());
         dialog.setIndeterminate(true);
+        dialog.setMessage(getString(R.string.msg_please_wait));
         dialog.setCancelable(isCancelable);
         dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         return dialog;

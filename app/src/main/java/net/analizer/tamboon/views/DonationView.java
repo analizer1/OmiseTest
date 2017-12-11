@@ -1,5 +1,7 @@
 package net.analizer.tamboon.views;
 
+import net.analizer.domainlayer.models.CreditCartInfo;
+
 public interface DonationView extends LoadingView {
 
     /**
@@ -26,4 +28,21 @@ public interface DonationView extends LoadingView {
      * Notify user that the donation has been made successfully.
      */
     void displayDonationComplete();
+
+    /**
+     * Display Credit Card Editor.
+     */
+    void displayCardEditor();
+
+    /**
+     * Display Credit Card Detail.
+     *
+     * @param creditCartInfo the Credit Card Detail
+     */
+    void displayCreditCard(CreditCartInfo creditCartInfo);
+
+    /**
+     * Tell the view to focus the donation amount input view.
+     */
+    void focusOnDonationAmountInput();
 }

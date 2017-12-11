@@ -3,6 +3,7 @@ package net.analizer.tamboon;
 import net.analizer.domainlayer.api.ApiInterface;
 import net.analizer.domainlayer.models.CreditCartInfo;
 import net.analizer.domainlayer.models.Donation;
+import net.analizer.domainlayer.models.DonationResponse;
 import net.analizer.tamboon.views.DonationPresenter;
 import net.analizer.tamboon.views.DonationView;
 
@@ -13,9 +14,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import io.reactivex.Observable;
+import io.reactivex.Single;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,66 +29,82 @@ public class DonationPresenterTest {
 
     private DonationPresenter donationPresenter;
 
+    private CreditCartInfo validCreditCartInfo;
+
+    private CreditCartInfo invalidCreditCartInfo;
+
     @Mock
     private DonationView donationView;
 
     @Mock
     private ApiInterface apiInterface;
 
-    @Mock
-    private CreditCartInfo validCreditCartInfo;
-
-    @Mock
-    private CreditCartInfo invalidCreditCartInfo;
-
-    @Mock
-    private Donation donation;
-
     @Before
     public void setUp() {
         donationPresenter = new DonationPresenter(apiInterface);
         donationPresenter.setView(donationView);
 
-        validCreditCartInfo.creditCardHolderName = "PANATCHAI VATHANASRI";
-        validCreditCartInfo.creditCardNo = "38056789000000000";
-        validCreditCartInfo.creditCardExpiry = "01/22";
-        validCreditCartInfo.creditCardCCV = "552";
+        validCreditCartInfo = new CreditCartInfo();
+        validCreditCartInfo.setCreditCardHolderName("PANATCHAI VATHANASRI");
+        validCreditCartInfo.setCreditCardNo("4242424242424242");
+        validCreditCartInfo.setCreditCardExpiry("01/22");
+        validCreditCartInfo.setCreditCardCVV("552");
 
-        invalidCreditCartInfo.creditCardHolderName = "PANATCHAI VATHANASRI";
-        invalidCreditCartInfo.creditCardNo = "";
-        invalidCreditCartInfo.creditCardExpiry = "01/22";
-        invalidCreditCartInfo.creditCardCCV = "552";
+        invalidCreditCartInfo = new CreditCartInfo();
+        invalidCreditCartInfo.setCreditCardHolderName("PANATCHAI VATHANASRI");
+        invalidCreditCartInfo.setCreditCardNo("2555225522552255");
+        invalidCreditCartInfo.setCreditCardExpiry("01/22");
+        invalidCreditCartInfo.setCreditCardCVV("552");
     }
 
     @Test
-    public void textCreditCardValidationForValidCard() throws Exception {
-        donationPresenter.onDonationDetailsEntered(validCreditCartInfo, 1);
+    public void testCreditCardValidationForValidCard() throws Exception {
+        donationPresenter.onDonationDetailsEntered(validCreditCartInfo, 1L);
+        verify(donationView).displayCreditCard(validCreditCartInfo);
         verify(donationView).enableDonateBtn();
     }
 
     @Test
-    public void textCreditCardValidationForInvValidCard() throws Exception {
-        donationPresenter.onDonationDetailsEntered(invalidCreditCartInfo, 1);
+    public void testCreditCardValidationForInvValidCard() throws Exception {
+        donationPresenter.onDonationDetailsEntered(invalidCreditCartInfo, 1L);
 
         verify(donationView).disableDonateBtn();
         verify(donationView).displayInvalidCardInfo();
     }
 
     @Test
-    public void textCreditCardValidationForInvalidDonationAmount() throws Exception {
-        donationPresenter.onDonationDetailsEntered(validCreditCartInfo, 0);
+    public void testValidCardButZeroDonationAmount() throws Exception {
+        donationPresenter.onDonationDetailsEntered(validCreditCartInfo, 0L);
+
+        verify(donationView).disableDonateBtn();
+        verify(donationView, never()).displayInvalidDonationAmount();
+    }
+
+    @Test
+    public void testCreditCardValidationForInvalidDonationAmount() throws Exception {
+        donationPresenter.onDonationDetailsEntered(validCreditCartInfo, -1L);
 
         verify(donationView).disableDonateBtn();
         verify(donationView).displayInvalidDonationAmount();
     }
 
     @Test
-    public void testSuccessfulDonate() throws Exception {
-        Observable<String> donateObservable = Observable.just("Success");
-        Observable<String> tokenObservable = Observable.just("Some Token");
+    public void testValidCardButNoAmountEntered() throws Exception {
+        donationPresenter.onDonationDetailsEntered(validCreditCartInfo, null);
 
-        when(apiInterface.getToken()).thenReturn(tokenObservable);
-        when(apiInterface.donate(any(Donation.class))).thenReturn(donateObservable);
+        verify(donationView).displayCreditCard(any(CreditCartInfo.class));
+        verify(donationView).focusOnDonationAmountInput();
+        verify(donationView).disableDonateBtn();
+        verify(donationView, never()).displayInvalidDonationAmount();
+    }
+
+    @Test
+    public void testSuccessfulDonate() throws Exception {
+        Single<DonationResponse> donateSingle = Single.just(new DonationResponse());
+        Single<String> tokenSingle = Single.just("Some Token");
+
+        when(apiInterface.getToken(validCreditCartInfo)).thenReturn(tokenSingle);
+        when(apiInterface.donate(any(Donation.class))).thenReturn(donateSingle);
 
         donationPresenter.onSubmitDonation(validCreditCartInfo, 1);
 
@@ -97,11 +115,11 @@ public class DonationPresenterTest {
 
     @Test
     public void testUnSuccessfulDonate() throws Exception {
-        Observable<String> donateObservable = Observable.error(new Throwable("Donation Api Error"));
-        Observable<String> tokenObservable = Observable.just("Some Token");
+        Single<DonationResponse> donateSingle = Single.error(new Throwable("Donation Api Error"));
+        Single<String> tokenSingle = Single.just("Some Token");
 
-        when(apiInterface.getToken()).thenReturn(tokenObservable);
-        when(apiInterface.donate(any(Donation.class))).thenReturn(donateObservable);
+        when(apiInterface.getToken(validCreditCartInfo)).thenReturn(tokenSingle);
+        when(apiInterface.donate(any(Donation.class))).thenReturn(donateSingle);
 
         donationPresenter.onSubmitDonation(validCreditCartInfo, 1);
 
@@ -112,9 +130,9 @@ public class DonationPresenterTest {
 
     @Test
     public void testUnSuccessfulGetToken() throws Exception {
-        Observable<String> tokenObservable = Observable.error(new Throwable("AccessToken Api Error"));
+        Single<String> tokenSingle = Single.error(new Throwable("AccessToken Api Error"));
 
-        when(apiInterface.getToken()).thenReturn(tokenObservable);
+        when(apiInterface.getToken(validCreditCartInfo)).thenReturn(tokenSingle);
 
         donationPresenter.onSubmitDonation(validCreditCartInfo, 1);
 

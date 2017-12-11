@@ -4,19 +4,24 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
+
 import net.analizer.domainlayer.api.ApiInterface;
 import net.analizer.domainlayer.models.CreditCartInfo;
 import net.analizer.domainlayer.models.Donation;
-import net.analizer.domainlayer.rx.NetworkObserver;
 import net.analizer.tamboon.presenters.BasicPresenter;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
 
 @SuppressWarnings("WeakerAccess")
 public class DonationPresenter implements BasicPresenter<DonationView> {
@@ -55,26 +60,39 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
         return charityListView;
     }
 
-    public void onDonationDetailsEntered(@NonNull CreditCartInfo creditCartInfo, long donationAmount) {
+    public void onDonationDetailsEntered(@NonNull CreditCartInfo creditCartInfo,
+                                         @Nullable Long donationAmount) {
 
         DonationView donationView = mDonateViewRef.get();
         if (donationView == null) {
             return;
         }
 
-        if (!isValidCreditCardInfo(creditCartInfo)) {
+        if (!creditCartInfo.isValid()) {
             donationView.disableDonateBtn();
             donationView.displayInvalidCardInfo();
             return;
         }
 
-        if (donationAmount <= 0) {
-            donationView.disableDonateBtn();
-            donationView.displayInvalidDonationAmount();
-            return;
-        }
+        donationView.displayCreditCard(creditCartInfo);
 
-        donationView.enableDonateBtn();
+        if (donationAmount != null) {
+            if (donationAmount < 0) {
+                donationView.disableDonateBtn();
+                donationView.displayInvalidDonationAmount();
+                return;
+
+            } else if (donationAmount == 0) {
+                donationView.disableDonateBtn();
+                return;
+            }
+
+            donationView.enableDonateBtn();
+
+        } else {
+            donationView.focusOnDonationAmountInput();
+            donationView.disableDonateBtn();
+        }
     }
 
     public void onSubmitDonation(@NonNull CreditCartInfo creditCartInfo, long donationAmount) {
@@ -86,56 +104,67 @@ public class DonationPresenter implements BasicPresenter<DonationView> {
 
         donationView.showLoading(false);
 
-        Observable<String> tokenObservable = mApiInterface.getToken();
-        tokenObservable
-                .flatMap(accessToken -> {
-                    if (TextUtils.isEmpty(accessToken)) {
-                        return Observable.error(new Throwable("Invalid Access Token"));
-                    }
+        Single<String> tokenSingle = mApiInterface.getToken(creditCartInfo);
+        tokenSingle
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.newThread())
+                .flatMap((Function<String, SingleSource<?>>) accessToken -> {
 
                     Donation donation = new Donation(
-                            creditCartInfo.creditCardHolderName,
+                            creditCartInfo.getCreditCardHolderName(),
                             accessToken,
                             donationAmount);
-                    return mApiInterface.donate(donation);
+
+                    return mApiInterface.donate(donation)
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribeOn(Schedulers.newThread());
                 })
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new NetworkObserver<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        donationView.dismissLoading();
-                        donationView.displayDonationComplete();
-                    }
+                .subscribe(response -> {
+                    donationView.dismissLoading();
+                    donationView.displayDonationComplete();
 
-                    @Override
-                    public void onNetworkError(Throwable t) {
-                        donationView.dismissLoading();
+                }, throwable -> {
+                    donationView.dismissLoading();
 
-                        // In this case,
-                        // Client cannot be sure of how well the server is implemented.
-                        // These checkings reassure that we do not display NULL message.
-                        String msg = t.getMessage();
-                        if (TextUtils.isEmpty(msg) && t.getCause() != null) {
-                            msg = t.getCause().getMessage();
+                    // In this case,
+                    // Client cannot be sure of how well the server is implemented.
+                    // These checks reassure that we do not display NULL message.
+                    String msg = null;
+
+                    if (HttpException.class.isAssignableFrom(throwable.getClass())) {
+                        HttpException exception = (HttpException) throwable;
+                        if (exception.response() != null) {
+                            ResponseBody responseBody = exception.response().errorBody();
+                            if (responseBody != null) {
+                                try {
+                                    msg = responseBody.string();
+                                } catch (IOException e) {
+                                }
+                            }
                         }
 
-                        if (TextUtils.isEmpty(msg)) {
-                            msg = "Unknown Error";
-                        }
-
-                        donationView.displayError(msg);
+                    } else {
+                        msg = throwable.getMessage();
                     }
+
+                    if (TextUtils.isEmpty(msg)) {
+                        msg = throwable.toString();
+                    }
+
+                    if (TextUtils.isEmpty(msg)) {
+                        msg = "Unknown Error";
+                    }
+
+                    donationView.displayError(msg);
                 });
     }
 
-    private boolean isValidCreditCardInfo(CreditCartInfo creditCartInfo) {
-        boolean isValid = creditCartInfo != null
-                && (creditCartInfo.creditCardHolderName != null && creditCartInfo.creditCardHolderName.length() > 0)
-                && (creditCartInfo.creditCardNo != null && creditCartInfo.creditCardNo.length() > 0)
-                && (creditCartInfo.creditCardExpiry != null && creditCartInfo.creditCardExpiry.length() > 0)
-                && (creditCartInfo.creditCardCCV != null && creditCartInfo.creditCardCCV.length() > 0);
+    public void onCreditCardClicked() {
+        DonationView donationView = mDonateViewRef.get();
+        if (donationView == null) {
+            return;
+        }
 
-        return isValid;
+        donationView.displayCardEditor();
     }
 }

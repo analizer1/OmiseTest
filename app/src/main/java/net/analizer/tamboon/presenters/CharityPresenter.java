@@ -77,10 +77,10 @@ public class CharityPresenter implements BasicPresenter<CharityListView> {
 
                         // In this case,
                         // Client cannot be sure of how well the server is implemented.
-                        // These checkings reassure that we do not display NULL message.
+                        // These checks reassure that we do not display NULL message.
                         String msg = t.getMessage();
-                        if (TextUtils.isEmpty(msg) && t.getCause() != null) {
-                            msg = t.getCause().getMessage();
+                        if (TextUtils.isEmpty(msg)) {
+                            msg = t.toString();
                         }
 
                         if (TextUtils.isEmpty(msg)) {

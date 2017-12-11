@@ -1,8 +1,10 @@
 package net.analizer.tamboon.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import net.analizer.domainlayer.models.Charity;
@@ -25,6 +27,10 @@ public class CharityActivity extends BaseActivity implements CharityListView {
     private ActivityCharityBinding mViewBinding;
     private CharityListAdapter mCharityListAdapter;
     private CharityListAdapter.OnCharityClickListener mOnCharityClickListener;
+
+    public static Intent getIntent(AppCompatActivity appCompatActivity) {
+        return new Intent(appCompatActivity, CharityActivity.class);
+    }
 
     @Override
     protected int getLayoutResId() {
@@ -106,8 +112,10 @@ public class CharityActivity extends BaseActivity implements CharityListView {
         charityPresenter.setView(this);
 
         // do other UIs initialization...
-        mOnCharityClickListener = charity ->
-                DonateActivity.showActivity(CharityActivity.this, charity);
+        mOnCharityClickListener = charity -> {
+            Intent intent = DonateActivity.getIntent(CharityActivity.this, charity);
+            startActivity(intent);
+        };
 
         charityPresenter.loadCharityList();
     }

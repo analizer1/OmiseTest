@@ -46,13 +46,13 @@ public class DonationPresenterTest {
 
         validCreditCartInfo = new CreditCartInfo();
         validCreditCartInfo.setCreditCardHolderName("PANATCHAI VATHANASRI");
-        validCreditCartInfo.setCreditCardNo("3805678900000000");
+        validCreditCartInfo.setCreditCardNo("4242424242424242");
         validCreditCartInfo.setCreditCardExpiry("01/22");
         validCreditCartInfo.setCreditCardCVV("552");
 
         invalidCreditCartInfo = new CreditCartInfo();
         invalidCreditCartInfo.setCreditCardHolderName("PANATCHAI VATHANASRI");
-        invalidCreditCartInfo.setCreditCardNo("");
+        invalidCreditCartInfo.setCreditCardNo("2555225522552255");
         invalidCreditCartInfo.setCreditCardExpiry("01/22");
         invalidCreditCartInfo.setCreditCardCVV("552");
     }

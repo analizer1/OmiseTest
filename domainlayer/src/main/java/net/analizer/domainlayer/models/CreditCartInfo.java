@@ -3,6 +3,8 @@ package net.analizer.domainlayer.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import co.omise.android.CardNumber;
+
 @SuppressWarnings("WeakerAccess")
 public class CreditCartInfo implements Parcelable {
 
@@ -68,11 +70,11 @@ public class CreditCartInfo implements Parcelable {
     }
 
     public boolean isValid() {
-        // TODO: 10/12/17 correct the credit card validation
         return (creditCardHolderName != null && creditCardHolderName.length() > 0)
                 && (creditCardNo != null && creditCardNo.length() == 16)
                 && (creditCardExpiry != null && creditCardExpiry.length() > 0)
                 && (creditCardCVV != null && creditCardCVV.length() > 0)
+                && CardNumber.luhn(creditCardNo)
                 && (creditCardCVV.matches("\\b[0-9]{3}\\b"))
                 && (creditCardExpiry.matches("^[\\d ]+/[\\d ]+"));
     }

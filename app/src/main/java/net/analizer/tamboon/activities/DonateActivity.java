@@ -1,5 +1,6 @@
 package net.analizer.tamboon.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -7,6 +8,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.inputmethod.InputMethodManager;
 
 import com.cooltechworks.creditcarddesign.CardEditActivity;
 import com.cooltechworks.creditcarddesign.CreditCardUtils;
@@ -116,8 +118,15 @@ public class DonateActivity extends BaseActivity implements DonationView {
 
     @Override
     public void focusOnDonationAmountInput() {
-        mViewBinding.donationAmountEditText.requestFocus();
-        mViewBinding.donationAmountEditText.invalidate();
+        if (mViewBinding.donationAmountEditText.requestFocus()) {
+            InputMethodManager imm = (InputMethodManager)
+                    getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            }
+        } else {
+            mViewBinding.donationAmountEditText.performClick();
+        }
     }
 
     @Override

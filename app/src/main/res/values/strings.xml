@@ -1,0 +1,13 @@
+<resources>
+    <string name="error_title">Error</string>
+    <string name="error_credit_card_info">Invalid Credit Card Detail</string>
+    <string name="error_donation_amount">Invalid Donation Amount</string>
+    <string name="msg_please_wait">Please wait...</string>
+    <string name="label_ok">OK</string>
+    <string name="label_close">Close</string>
+    <string name="label_donate">Donate</string>
+    <string name="label_congratulations">Thank You for your donation.</string>
+    <string name="label_donation_amount">Donation Amount (THB): </string>
+    <string name="label_card_holder_name">Card Holder Name</string>
+    <string name="label_charity_profile_image">Charity Image</string>
+</resources>

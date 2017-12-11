@@ -30,12 +30,12 @@ task clean(type: Delete) {
 
 ext {
     /* designate the major or significant change (e.g. totally revamp) */
-    mVersionMajor = 2
+    mVersionMajor = 1
     /* designate the minor change (e.g. add/remove features) */
     mVersionMinor = 0
     mVersionSmall = 0
     /* bug fixes */
-    mVersionCode = 221
+    mVersionCode = 1
     mVersionName = mVersionMajor + "." + mVersionMinor + "." + mVersionSmall
 
     mTargetSdkVersion = 27
